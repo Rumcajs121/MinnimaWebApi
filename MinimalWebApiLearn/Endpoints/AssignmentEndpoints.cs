@@ -14,21 +14,21 @@ namespace MinimalWebApiLearn.Endpoints
 
                     using var connection = sqlConnectionFactory.Create();
 
-                    const string sqlQuery = "SELECT * FROM Task";
+                    const string sqlQuery = "SELECT * FROM ToDoListDb";
 
                     var tasks = await connection.QueryAsync<Assignment>(sqlQuery);
                     return Results.Ok(tasks);
                 })
                 .WithName("Tasks")
                 .WithOpenApi();
-            builder.MapGet("/tasks/{id}",async(int id, SqlConnectionFactory sqlConnectionFactory)=>
+            builder.MapGet("/task/{id}",async(int id, SqlConnectionFactory sqlConnectionFactory)=>
             {
 
                 using var connection = sqlConnectionFactory.Create();
 
                 const string sqlQuery = """
                                         SELECT * 
-                                        FROM Task
+                                        FROM ToDoListDb
                                         WHERE Id = @TaskId
                                         """;
 

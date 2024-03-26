@@ -36,6 +36,7 @@ namespace MinimalWebApiLearn.Endpoints
                 return task is not null ? Results.Ok(task): Results.NotFound("Not  task for this Id");
             }).WithName("Task")
             .WithOpenApi();
+
             builder.MapDelete("/Delete{id}",async (int id, SqlConnectionFactory sqlConnectionFactory) =>
             {
 
@@ -51,6 +52,25 @@ namespace MinimalWebApiLearn.Endpoints
 
             })
             .WithName("Delete")
+            .WithOpenApi();
+
+            builder.MapPut("/CreateNewTask",async (string description, DateTime endTime, SqlConnectionFactory sqlConnectionFactory) =>
+            {
+
+                using var connection = sqlConnectionFactory.Create();
+
+                const string sqlQuery = """
+                                        INSERT INTO [dbo].[ToDoListDb]
+                                        ([Description],[EndDate])
+                                        VALUES
+                                        (@Description,@EndTime)
+                                        """;
+                var task = await connection.ExecuteAsync(sqlQuery, new { @Description = description, @EndTime=(DateTime)endTime });
+                
+                return task == 0 ? Results.NotFound($"Something is wrong.") : Results.Ok($"Task {description} created");
+
+            })
+            .WithName("CreateNewTask")
             .WithOpenApi();
         }
     }

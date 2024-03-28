@@ -16,12 +16,14 @@ namespace MinimalWebApiLearn.Endpoints
         {
             using IDbConnection connection = new SqlConnection(_config.GetConnectionString(connetionID));
 
-            return await connection.QueryAsync<T>(storedProcedure, parameters);
+            return await connection.QueryAsync<T>(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
         }
         public async Task SaveData<T>(string storedProcedure, T parameters, string connetionID = "MinimalWebApi")
         {
             using IDbConnection connection = new SqlConnection(_config.GetConnectionString(connetionID));
-            await connection.ExecuteAsync(storedProcedure, parameters);
+            await connection.ExecuteAsync(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
         }
+
+
     }
 }

@@ -15,7 +15,7 @@ builder.Services.AddSingleton(serviceProvider =>
 {
     var configuration = serviceProvider.GetRequiredService<IConfiguration>();
 
-    var connectionString=configuration.GetConnectionString("MinimalWebApi") ?? 
+    var connectionString = configuration.GetConnectionString("MinimalWebApi") ??
                          throw new ApplicationException("The conection string is null");
     return new SqlConnectionFactory(connectionString);
 });

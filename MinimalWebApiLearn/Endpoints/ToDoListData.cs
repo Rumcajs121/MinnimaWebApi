@@ -11,7 +11,7 @@ namespace MinimalWebApiLearn.Endpoints
             _db = db;
         }
 
-        public Task<IEnumerable<Assignment>> GetAllToDoListS() => _db.LoadData<Assignment, dynamic>("Xyz", new { });
+        public Task<IEnumerable<Assignment>> GetAllToDoListS() => _db.LoadData<Assignment, dynamic>("dbo.spToDoListsDb_GettAll", new { });
         public async Task <Assignment?> GetToDoList(int id)
         {
             var results=await _db.LoadData<Assignment,dynamic>("Xyz", new {Id=id});

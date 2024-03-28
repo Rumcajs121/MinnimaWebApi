@@ -2,7 +2,7 @@
 
 namespace MinimalWebApiLearn.Endpoints
 {
-    public class ToDoListData
+    public class ToDoListData : IToDoListData
     {
         private readonly ISqlDataAcces _db;
 
@@ -17,8 +17,8 @@ namespace MinimalWebApiLearn.Endpoints
             var results=await _db.LoadData<Assignment,dynamic>("dbo.spToDoListsDb_GettOneTask", new {Id=id});
             return results.FirstOrDefault();
         }
-        public Task InsertToDoList(Assignment assignment) =>_db.SaveData("dbo.spToDoListsDb_CreateNewTask", new{ assignment.Description, assignment.EndDate});
-        public Task UpdateTask(Assignment assignment) =>_db.SaveData("dbo.spToDoListsDb_EditTask", new{ assignment.Description, assignment.EndDate});
+        public Task InsertToDoList(string description, DateTime endDate) =>_db.SaveData("dbo.spToDoListsDb_CreateNewTask", new{Description=description, EndDate=endDate});
+        public Task UpdateTask(Assignment assignment) =>_db.SaveData("dbo.spToDoListsDb_EditTask", new{ assignment.Id, assignment.Description, assignment.EndDate});
         public Task DeleteTask(int id) =>_db.SaveData("dbo.spToDoListsDb_DeleteTaskId",new{ Id=id});
     }
 }

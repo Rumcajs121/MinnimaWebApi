@@ -17,8 +17,8 @@ namespace MinimalWebApiLearn.Endpoints
             var results=await _db.LoadData<Assignment,dynamic>("dbo.spToDoListsDb_GettOneTask", new {Id=id});
             return results.FirstOrDefault();
         }
-        public Task InsertToDoList(string description, DateTime endDate) =>_db.SaveData("dbo.spToDoListsDb_CreateNewTask", new{Description=description, EndDate=endDate});
-        public Task UpdateTask(int id, string description, DateTime endDate) =>_db.SaveData("dbo.spToDoListsDb_EditTask", new{ Id=id, Description = description, EndDate=endDate});
+        public Task InsertToDoList(AssignmentDto assignment) =>_db.SaveData("dbo.spToDoListsDb_CreateNewTask", new{Description=assignment.Description, EndDate=assignment.EndDate});
+        public Task UpdateTask(int id, AssignmentDto assignment) =>_db.SaveData("dbo.spToDoListsDb_EditTask", new{ Id=id, Description = assignment.Description, EndDate=assignment.EndDate});
         public Task DeleteTask(int id) =>_db.SaveData("dbo.spToDoListsDb_DeleteTaskId",new{ Id=id});
     }
 }

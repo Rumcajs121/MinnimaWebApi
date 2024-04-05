@@ -6,7 +6,7 @@ public interface IToDoListData
 {
     Task<IEnumerable<Assignment>> GetAllToDoListS();
     Task <Assignment?> GetToDoList(int id);
-    Task InsertToDoList(string description, DateTime endDate);
-    Task UpdateTask(int id, string description, DateTime endDate);
+    Task InsertToDoList(AssignmentDto assignment);
+    Task UpdateTask(int id, AssignmentDto assignment);
     Task DeleteTask(int id);
 }

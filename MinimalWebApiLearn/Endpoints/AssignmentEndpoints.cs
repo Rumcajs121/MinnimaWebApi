@@ -21,10 +21,10 @@ namespace MinimalWebApiLearn.Endpoints
             app.MapPost("/createNewTask", CreateNewTask)
                 .WithName("CreateNewTask")
                 .WithOpenApi();
-            app.MapPut("/editTask{id}", EditTask)
+            app.MapPut("/editTask/{id}", EditTask)
                 .WithName("EditTask")
                 .WithOpenApi();
-            app.MapDelete("/deleteTask{id}", DeleteTask)
+            app.MapDelete("/deleteTask/{id}", DeleteTask)
                 .WithName("DeleteTask")
                 .WithOpenApi();
         }
@@ -59,24 +59,24 @@ namespace MinimalWebApiLearn.Endpoints
             }
         }
 
-        private static async Task<IResult> CreateNewTask(string description, DateTime endDate, IToDoListData data)
+        private static async Task<IResult> CreateNewTask(AssignmentDto assignment, IToDoListData data)
         {
             try
             {
-                await data.InsertToDoList(description,endDate);
+                await data.InsertToDoList(assignment);
                 return Results.Ok(
-                    $"Task: {description} is created. Time the end Task is: {(DateTime.Now - endDate).Days}");
+                    $"Task: {assignment.Description} is created. Time the end Task is: {(assignment.EndDate-DateTime.Now).Days}");
             }
             catch (Exception ex)
             {
                 return Results.Problem(ex.Message);
             }
         }
-                private static async Task<IResult> EditTask(int id, string description, DateTime endDate, IToDoListData data)
+                private static async Task<IResult> EditTask(int id, AssignmentDto assignment, IToDoListData data)
         {
             try
             {
-                await data.UpdateTask(id, description, endDate);
+                await data.UpdateTask(id, assignment);
                 return Results.Ok($"Task fo ID: {id} update");
             }
             catch (Exception ex)

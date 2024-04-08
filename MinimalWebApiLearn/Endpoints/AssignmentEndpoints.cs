@@ -10,17 +10,32 @@ namespace MinimalWebApiLearn.Endpoints
     {
         public static void MapAssignmentEndpoints(this WebApplication app)
         {
-
+            
             app.MapGet("/tasks", GetTasks)
                 .WithName("Tasks")
-                .WithOpenApi();
+                .WithOpenApi(generatedOperation =>
+                {
+                    generatedOperation.Summary = "Download all tasks";
+                            generatedOperation.Description = "Retrieves a list of all tasks in the ToDoList.";
+
+                            return generatedOperation;
+                }).Produces<Assignment>(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status404NotFound);
 
             app.MapGet("/task/{id}", GetOneTaskId)
                 .WithName("Task")
                 .WithOpenApi();
             app.MapPost("/createNewTask", CreateNewTask)
                 .WithName("CreateNewTask")
-                .WithOpenApi();
+                .WithOpenApi(generatedOperation =>
+                {
+                    generatedOperation.Summary = "Download ones task for Id";
+                            generatedOperation.Description = "Retrieves a one task in the ToDoList for Id.";
+
+                            return generatedOperation;
+                })
+                .Produces<AssignmentDto>(StatusCodes.Status201Created)
+                .Accepts<AssignmentDto>("application/json");
             app.MapPut("/editTask/{id}", EditTask)
                 .WithName("EditTask")
                 .WithOpenApi();
@@ -64,12 +79,12 @@ namespace MinimalWebApiLearn.Endpoints
             try
             {
                 await data.InsertToDoList(assignment);
-                return Results.Ok(
-                    $"Task: {assignment.Description} is created. Time the end Task is: {(assignment.EndDate-DateTime.Now).Days}");
+                return Results.Created(
+                    $"Task: {assignment.Description} is created. Time the end Task is: {(assignment.EndDate-DateTime.Now).Days}",assignment);
             }
             catch (Exception ex)
             {
-                return Results.Problem(ex.Message);
+                return Results.BadRequest(Results.Problem(ex.Message));
             }
         }
                 private static async Task<IResult> EditTask(int id, AssignmentDto assignment, IToDoListData data)

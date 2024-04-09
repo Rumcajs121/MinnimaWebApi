@@ -5,16 +5,16 @@ namespace MinimalWebApiLearn;
 
 public class ToDoValidator:AbstractValidator<AssignmentDto>
 {
-    public bool BeAValidDate(string value){
-        return DateTime.TryParseExact(value, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out _);
+
+    private bool BeValidDate(string date)
+    {
+        return DateTime.TryParse(date, out _);
     }
     public ToDoValidator()
     {
         RuleFor(x=>x.Description).NotEmpty()
                                 .MinimumLength(3)
                                 .WithMessage("Description is empty You read Task");
-        RuleFor(x=>x.EndDate)
-        .Must(date=>BeAValidDate(date.ToString("yyyy-MM-dd")))
-        .WithMessage("Data is wrong format");
+        RuleFor(x=>x.EndDate).NotEmpty().WithMessage("Date is required").Must(BeValidDate).WithMessage("Property dataTime must RRRR-MM-DD format.");
     }
 }

@@ -115,7 +115,7 @@ namespace MinimalWebApiLearn.Endpoints
             {   
                 await data.InsertToDoList(assignment);
                 return Results.Ok(
-                    $"Task: {assignment.Description} is created. Time the end Task is: {((DateTime)assignment.EndDate-DateTime.Now).Days}");
+                    $"Task: {assignment.Description} is created. Time the end Task is:");
             }
             catch (Exception ex)
             {

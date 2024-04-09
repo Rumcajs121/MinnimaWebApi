@@ -1,5 +1,6 @@
 ﻿using System.Data.SqlClient;
 using System.Net.NetworkInformation;
+using System.Reflection.Metadata;
 using Dapper;
 using MinimalWebApiLearn.Models;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -10,23 +11,67 @@ namespace MinimalWebApiLearn.Endpoints
     {
         public static void MapAssignmentEndpoints(this WebApplication app)
         {
-
+            
             app.MapGet("/tasks", GetTasks)
                 .WithName("Tasks")
-                .WithOpenApi();
+                .WithOpenApi(generatedOperation =>
+                {
+                    generatedOperation.Summary = "Download all tasks";
+                            generatedOperation.Description = "Retrieves a list of all tasks in the ToDoList.";
+
+                            return generatedOperation;
+                }).Produces<Assignment>(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status404NotFound)
+                .WithTags("Read");
 
             app.MapGet("/task/{id}", GetOneTaskId)
                 .WithName("Task")
-                .WithOpenApi();
+                .WithOpenApi(generatedOperation =>
+                {
+                    generatedOperation.Summary = "Download one task for Id";
+                            generatedOperation.Description = "Retrieves a one Task in the ToDoList.";
+
+                            return generatedOperation;
+                })
+                .Produces<Assignment>(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status404NotFound)
+                .WithTags("Read");
+
             app.MapPost("/createNewTask", CreateNewTask)
                 .WithName("CreateNewTask")
-                .WithOpenApi();
+                .WithOpenApi(generatedOperation =>
+                {
+                    generatedOperation.Summary = "Download ones task for Id";
+                            generatedOperation.Description = "Retrieves a one task in the ToDoList for Id.";
+
+                            return generatedOperation;
+                })
+                .Produces<AssignmentDto>(StatusCodes.Status201Created)
+                .Produces(StatusCodes.Status400BadRequest)
+                .Accepts<AssignmentDto>("application/json").WithTags("Created");
             app.MapPut("/editTask/{id}", EditTask)
                 .WithName("EditTask")
-                .WithOpenApi();
+                .WithOpenApi()
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces(StatusCodes.Status404NotFound)
+                .Accepts<AssignmentDto>("application/json").WithOpenApi(generatedOperation =>
+                {
+                    generatedOperation.Summary = "Edit task for Id";
+                            generatedOperation.Description = "Edit task in the ToDoList for Id.";
+
+                            return generatedOperation;
+                }).WithTags("Update");
             app.MapDelete("/deleteTask/{id}", DeleteTask)
                 .WithName("DeleteTask")
-                .WithOpenApi();
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces(StatusCodes.Status404NotFound)
+                .WithOpenApi(generatedOperation =>
+                {
+                    generatedOperation.Summary = "Delete task for Id";
+                            generatedOperation.Description = "Delete task in the ToDoList for Id.";
+
+                            return generatedOperation;
+                }).WithTags("Delete");
         }
 
         private static async Task<IResult> GetTasks(IToDoListData data)
@@ -37,7 +82,7 @@ namespace MinimalWebApiLearn.Endpoints
             }
             catch (Exception ex)
             {
-                return Results.Problem(ex.Message);
+                return Results.NotFound(Results.Problem(ex.Message));
             }
         }
 
@@ -55,7 +100,7 @@ namespace MinimalWebApiLearn.Endpoints
             }
             catch (Exception ex)
             {
-                return Results.Problem(ex.Message);
+                return Results.NotFound(Results.Problem(ex.Message));
             }
         }
 
@@ -64,12 +109,12 @@ namespace MinimalWebApiLearn.Endpoints
             try
             {
                 await data.InsertToDoList(assignment);
-                return Results.Ok(
-                    $"Task: {assignment.Description} is created. Time the end Task is: {(assignment.EndDate-DateTime.Now).Days}");
+                return Results.Created(
+                    $"Task: {assignment.Description} is created. Time the end Task is: {(assignment.EndDate-DateTime.Now).Days}",assignment);
             }
             catch (Exception ex)
             {
-                return Results.Problem(ex.Message);
+                return Results.BadRequest(Results.Problem(ex.Message));
             }
         }
                 private static async Task<IResult> EditTask(int id, AssignmentDto assignment, IToDoListData data)
@@ -77,11 +122,11 @@ namespace MinimalWebApiLearn.Endpoints
             try
             {
                 await data.UpdateTask(id, assignment);
-                return Results.Ok($"Task fo ID: {id} update");
+                return Results.NoContent();
             }
             catch (Exception ex)
             {
-                return Results.Problem(ex.Message);
+                return Results.NotFound(Results.Problem(ex.Message));
             }
         }
                 private static async Task<IResult> DeleteTask(int id, IToDoListData data)
@@ -90,11 +135,11 @@ namespace MinimalWebApiLearn.Endpoints
             {
                 await data.DeleteTask(id);
 
-                return Results.Ok($"Task fo ID: {id} id deleted");
+                return Results.NoContent();
             }
             catch (Exception ex)
             {
-                return Results.Problem(ex.Message);
+                return Results.NotFound(Results.Problem(ex.Message));
             }
         }
     }

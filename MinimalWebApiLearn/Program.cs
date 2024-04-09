@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(setup => setup.SwaggerDoc("v1", new OpenApiInfo()
 {
-    Description = "This is a simple implementation of a Minimal Api in Asp.Net 7 Core and implementation CQRS pattern. I used dapper in my database.",
+    Description = "This is a simple implementation of a Minimal Api in Asp.Net 7 Core and implementation CRUD pattern. I used dapper in my database.",
     Title = "ToDoList MinimalWebApi",
     Version = "v1",
     Contact = new OpenApiContact()

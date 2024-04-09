@@ -1,5 +1,6 @@
 ﻿using System.Data.SqlClient;
 using System.Net.NetworkInformation;
+using System.Reflection.Metadata;
 using Dapper;
 using MinimalWebApiLearn.Models;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -20,11 +21,22 @@ namespace MinimalWebApiLearn.Endpoints
 
                             return generatedOperation;
                 }).Produces<Assignment>(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status404NotFound);
+                .Produces(StatusCodes.Status404NotFound)
+                .WithTags("Read");
 
             app.MapGet("/task/{id}", GetOneTaskId)
                 .WithName("Task")
-                .WithOpenApi();
+                .WithOpenApi(generatedOperation =>
+                {
+                    generatedOperation.Summary = "Download one task for Id";
+                            generatedOperation.Description = "Retrieves a one Task in the ToDoList.";
+
+                            return generatedOperation;
+                })
+                .Produces<Assignment>(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status404NotFound)
+                .WithTags("Read");
+
             app.MapPost("/createNewTask", CreateNewTask)
                 .WithName("CreateNewTask")
                 .WithOpenApi(generatedOperation =>
@@ -35,13 +47,31 @@ namespace MinimalWebApiLearn.Endpoints
                             return generatedOperation;
                 })
                 .Produces<AssignmentDto>(StatusCodes.Status201Created)
-                .Accepts<AssignmentDto>("application/json");
+                .Produces(StatusCodes.Status400BadRequest)
+                .Accepts<AssignmentDto>("application/json").WithTags("Created");
             app.MapPut("/editTask/{id}", EditTask)
                 .WithName("EditTask")
-                .WithOpenApi();
+                .WithOpenApi()
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces(StatusCodes.Status404NotFound)
+                .Accepts<AssignmentDto>("application/json").WithOpenApi(generatedOperation =>
+                {
+                    generatedOperation.Summary = "Edit task for Id";
+                            generatedOperation.Description = "Edit task in the ToDoList for Id.";
+
+                            return generatedOperation;
+                }).WithTags("Update");
             app.MapDelete("/deleteTask/{id}", DeleteTask)
                 .WithName("DeleteTask")
-                .WithOpenApi();
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces(StatusCodes.Status404NotFound)
+                .WithOpenApi(generatedOperation =>
+                {
+                    generatedOperation.Summary = "Delete task for Id";
+                            generatedOperation.Description = "Delete task in the ToDoList for Id.";
+
+                            return generatedOperation;
+                }).WithTags("Delete");
         }
 
         private static async Task<IResult> GetTasks(IToDoListData data)
@@ -52,7 +82,7 @@ namespace MinimalWebApiLearn.Endpoints
             }
             catch (Exception ex)
             {
-                return Results.Problem(ex.Message);
+                return Results.NotFound(Results.Problem(ex.Message));
             }
         }
 
@@ -70,7 +100,7 @@ namespace MinimalWebApiLearn.Endpoints
             }
             catch (Exception ex)
             {
-                return Results.Problem(ex.Message);
+                return Results.NotFound(Results.Problem(ex.Message));
             }
         }
 
@@ -92,11 +122,11 @@ namespace MinimalWebApiLearn.Endpoints
             try
             {
                 await data.UpdateTask(id, assignment);
-                return Results.Ok($"Task fo ID: {id} update");
+                return Results.NoContent();
             }
             catch (Exception ex)
             {
-                return Results.Problem(ex.Message);
+                return Results.NotFound(Results.Problem(ex.Message));
             }
         }
                 private static async Task<IResult> DeleteTask(int id, IToDoListData data)
@@ -105,11 +135,11 @@ namespace MinimalWebApiLearn.Endpoints
             {
                 await data.DeleteTask(id);
 
-                return Results.Ok($"Task fo ID: {id} id deleted");
+                return Results.NoContent();
             }
             catch (Exception ex)
             {
-                return Results.Problem(ex.Message);
+                return Results.NotFound(Results.Problem(ex.Message));
             }
         }
     }

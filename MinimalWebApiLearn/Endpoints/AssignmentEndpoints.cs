@@ -2,6 +2,7 @@
 using System.Net.NetworkInformation;
 using System.Reflection.Metadata;
 using Dapper;
+using FluentValidation;
 using MinimalWebApiLearn.Models;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -41,12 +42,12 @@ namespace MinimalWebApiLearn.Endpoints
                 .WithName("CreateNewTask")
                 .WithOpenApi(generatedOperation =>
                 {
-                    generatedOperation.Summary = "Download ones task for Id";
-                            generatedOperation.Description = "Retrieves a one task in the ToDoList for Id.";
+                    generatedOperation.Summary = "Created task for Id";
+                            generatedOperation.Description = "Create new task in the ToDoList.";
 
                             return generatedOperation;
                 })
-                .Produces<AssignmentDto>(StatusCodes.Status201Created)
+                .Produces<AssignmentDto>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status400BadRequest)
                 .Accepts<AssignmentDto>("application/json").WithTags("Created");
             app.MapPut("/editTask/{id}", EditTask)
@@ -104,21 +105,29 @@ namespace MinimalWebApiLearn.Endpoints
             }
         }
 
-        private static async Task<IResult> CreateNewTask(AssignmentDto assignment, IToDoListData data)
+        private static async Task<IResult> CreateNewTask(AssignmentDto assignment, IToDoListData data,IValidator<AssignmentDto> validator)
         {
+            var validationResult=validator.Validate(assignment);
+            if(!validationResult.IsValid){
+                return Results.BadRequest(validationResult.Errors);
+            }
             try
-            {
+            {   
                 await data.InsertToDoList(assignment);
-                return Results.Created(
-                    $"Task: {assignment.Description} is created. Time the end Task is: {(assignment.EndDate-DateTime.Now).Days}",assignment);
+                return Results.Ok(
+                    $"Task: {assignment.Description} is created. Time the end Task is: {((DateTime)assignment.EndDate-DateTime.Now).Days}");
             }
             catch (Exception ex)
             {
                 return Results.BadRequest(Results.Problem(ex.Message));
             }
         }
-                private static async Task<IResult> EditTask(int id, AssignmentDto assignment, IToDoListData data)
+                private static async Task<IResult> EditTask(int id, AssignmentDto assignment, IToDoListData data, IValidator<AssignmentDto> validator)
         {
+            var validationResult=validator.Validate(assignment);
+            if(!validationResult.IsValid){
+                return Results.BadRequest(validationResult.Errors);
+            }
             try
             {
                 await data.UpdateTask(id, assignment);

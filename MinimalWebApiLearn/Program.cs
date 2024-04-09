@@ -1,9 +1,12 @@
 using System.Data.SqlClient;
 using Dapper;
+using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.OpenApi.Models;
+using MinimalWebApiLearn;
 using MinimalWebApiLearn.Endpoints;
 using MinimalWebApiLearn.Models;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,12 +21,13 @@ builder.Services.AddSwaggerGen(setup => setup.SwaggerDoc("v1", new OpenApiInfo()
     Version = "v1",
     Contact = new OpenApiContact()
     {
-        Name = "Zbigniew Miara",
+        Name = "Rumcaj121",
         Url = new Uri("https://github.com/Rumcajs121/MinnimaWebApi")
     }
 }));
 builder.Services.AddSingleton<ISqlDataAcces, SqlDataAcces>();
 builder.Services.AddSingleton<IToDoListData, ToDoListData>();
+builder.Services.AddValidatorsFromAssemblyContaining(typeof(ToDoValidator));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -1,4 +1,5 @@
-﻿using System.Data.SqlClient;
+﻿using System.Data;
+using System.Data.SqlClient;
 using System.Net.NetworkInformation;
 using System.Reflection.Metadata;
 using Dapper;
@@ -49,7 +50,8 @@ namespace MinimalWebApiLearn.Endpoints
                 })
                 .Produces<AssignmentDto>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status400BadRequest)
-                .Accepts<AssignmentDto>("application/json").WithTags("Created");
+                .Accepts<AssignmentDto>("application/json").WithTags("Created")
+                .WithValidator<AssignmentDto>();
             app.MapPut("/editTask/{id}", EditTask)
                 .WithName("EditTask")
                 .WithOpenApi()
@@ -61,7 +63,8 @@ namespace MinimalWebApiLearn.Endpoints
                             generatedOperation.Description = "Edit task in the ToDoList for Id.";
 
                             return generatedOperation;
-                }).WithTags("Update");
+                }).WithTags("Update")
+                .WithValidator<AssignmentDto>();;
             app.MapDelete("/deleteTask/{id}", DeleteTask)
                 .WithName("DeleteTask")
                 .Produces(StatusCodes.Status204NoContent)
@@ -105,29 +108,22 @@ namespace MinimalWebApiLearn.Endpoints
             }
         }
 
-        private static async Task<IResult> CreateNewTask(AssignmentDto assignment, IToDoListData data,IValidator<AssignmentDto> validator)
+        private static async Task<IResult> CreateNewTask(AssignmentDto assignment, IToDoListData data)
         {
-            var validationResult=validator.Validate(assignment);
-            if(!validationResult.IsValid){
-                return Results.BadRequest(validationResult.Errors);
-            }
             try
             {   
                 await data.InsertToDoList(assignment);
+                var timeTheEnd=(DateTime.Parse(assignment.EndDate) - DateTime.Now).Days;
                 return Results.Ok(
-                    $"Task: {assignment.Description} is created. Time the end Task is:");
+                    $"Task: {assignment.Description} is created. Time the end Task:{timeTheEnd}");
             }
             catch (Exception ex)
             {
                 return Results.BadRequest(Results.Problem(ex.Message));
             }
         }
-                private static async Task<IResult> EditTask(int id, AssignmentDto assignment, IToDoListData data, IValidator<AssignmentDto> validator)
+                private static async Task<IResult> EditTask(int id, AssignmentDto assignment, IToDoListData data)
         {
-            var validationResult=validator.Validate(assignment);
-            if(!validationResult.IsValid){
-                return Results.BadRequest(validationResult.Errors);
-            }
             try
             {
                 await data.UpdateTask(id, assignment);

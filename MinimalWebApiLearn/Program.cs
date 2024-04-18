@@ -6,6 +6,9 @@ using Microsoft.OpenApi.Models;
 using MinimalWebApiLearn;
 using MinimalWebApiLearn.Endpoints;
 using MinimalWebApiLearn.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 
 
@@ -28,7 +31,18 @@ builder.Services.AddSwaggerGen(setup => setup.SwaggerDoc("v1", new OpenApiInfo()
 builder.Services.AddSingleton<ISqlDataAcces, SqlDataAcces>();
 builder.Services.AddSingleton<IToDoListData, ToDoListData>();
 builder.Services.AddValidatorsFromAssemblyContaining(typeof(ToDoValidator));
+builder.Services.AddAuthentication("Bearer").AddJwtBearer(cfg=>
+cfg.TokenValidationParameters = new TokenValidationParameters{
+    ValidIssuer=builder.Configuration["JwtIssuer"],
+    ValidAudience=builder.Configuration["JwtIssuer"],
+    IssuerSigningKey=new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtKey"]))
+});
+
+builder.Services.AddAuthorization();
 var app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
